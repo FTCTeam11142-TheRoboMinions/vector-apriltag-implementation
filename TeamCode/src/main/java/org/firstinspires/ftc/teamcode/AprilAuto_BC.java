@@ -54,9 +54,9 @@ public class AprilAuto_BC extends LinearOpMode
     double cy = 221.506;
 
     // UNITS ARE METERS
-    double tagsize = 0.05;
+    double tagsize = 0.0762;
 
-    int ID_TAG_OF_INTEREST = 15; // Tag ID 18 from the 36h11 family
+    int ID_TAG_OF_INTEREST = 11; // Tag ID 11 from the 36h11 family
 
     AprilTagDetection tagOfInterest = null;
 

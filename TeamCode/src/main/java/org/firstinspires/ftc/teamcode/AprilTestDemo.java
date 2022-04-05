@@ -52,7 +52,7 @@ public class AprilTestDemo extends LinearOpMode
     double cy = 221.506;
 
     // UNITS ARE METERS
-    double tagsize = 0.166;
+    double tagsize = 0.0762;
 
     int numFramesWithoutDetection = 0;
 
@@ -114,6 +114,7 @@ public class AprilTestDemo extends LinearOpMode
                     {
                         aprilTagDetectionPipeline.setDecimation(DECIMATION_LOW);
                     }
+                    telemetry.addLine("Case Right");
                 }
                 // We do see tags!
                 else
@@ -136,6 +137,12 @@ public class AprilTestDemo extends LinearOpMode
                         telemetry.addLine(String.format("Rotation Yaw: %.2f degrees", Math.toDegrees(detection.pose.yaw)));
                         telemetry.addLine(String.format("Rotation Pitch: %.2f degrees", Math.toDegrees(detection.pose.pitch)));
                         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
+
+                        if (detection.pose.x*FEET_PER_METER > 0.1) {
+                            telemetry.addLine("Case Middle");
+                        } else if (detection.pose.x*FEET_PER_METER < -0.1) {
+                            telemetry.addLine("Case Middle");
+                        }
                     }
                 }
 

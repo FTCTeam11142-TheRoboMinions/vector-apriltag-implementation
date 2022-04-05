@@ -76,7 +76,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     public DcMotorEx leftFront, leftRear, rightRear, rightFront;
     public List<DcMotorEx> motors;
 
-    public DcMotorEx carin, linx;
+    public DcMotor carin, linx;
     public Servo hopper;
 
 
@@ -128,14 +128,14 @@ public class SampleMecanumDrive extends MecanumDrive {
         // and the placement of the dot/orientation from https://docs.revrobotics.com/rev-control-system/control-system-overview/dimensions#imu-location
         //
         // For example, if +Y in this diagram faces downwards, you would use AxisDirection.NEG_Y.
-        BNO055IMUUtil.remapZAxis(imu, AxisDirection.NEG_Z);
+        BNO055IMUUtil.remapZAxis(imu, AxisDirection.NEG_X);
 
         leftFront = hardwareMap.get(DcMotorEx.class, "lf");
         leftRear = hardwareMap.get(DcMotorEx.class, "lr");
         rightRear = hardwareMap.get(DcMotorEx.class, "rr");
         rightFront = hardwareMap.get(DcMotorEx.class, "rf");
-        carin = hardwareMap.get(DcMotorEx.class, "carin");
-        linx = hardwareMap.get(DcMotorEx.class, "linx");
+        carin = hardwareMap.get(DcMotor.class, "carin");
+        linx = hardwareMap.get(DcMotor.class, "linx");
         hopper = hardwareMap.get(Servo.class, "hopper");
 
 
@@ -158,8 +158,8 @@ public class SampleMecanumDrive extends MecanumDrive {
         }
 
         // TODO: reverse any motors using DcMotor.setDirection()
-        rightRear.setDirection(DcMotor.Direction.REVERSE);                                  //alternating between forward and reverse depending on motor placement
-        leftRear.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.REVERSE);                                  //alternating between forward and reverse depending on motor placement
+        rightRear.setDirection(DcMotor.Direction.REVERSE);
 
         // TODO: if desired, use setLocalizer() to change the localization method
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));

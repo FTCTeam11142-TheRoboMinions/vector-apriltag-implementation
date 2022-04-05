@@ -23,7 +23,7 @@ import java.util.List;
 // Name the program as it shows up in the robotr Station
 @Autonomous(name = "Blue Carousel")
 
-public class BlueCarousel extends LinearOpMode {
+public class Old_BlueCarousel extends LinearOpMode {
 
     SampleMecanumDrive vector;
     /* Note: This sample uses the all-objects Tensor Flow model (FreightFrenzy_BCDM.tflite), which contains

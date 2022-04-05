@@ -8,11 +8,13 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+
 @TeleOp(name = "April TeleOp")
 public class AprilTeleOp extends OpMode {
-    public DcMotor leftFront, leftRear, rightRear, rightFront;
-    public DcMotorEx carin, linx;
-    public Servo hopper;
+    SampleMecanumDrive vector;
+
     double leftFrontPower, rightFrontPower, leftRearPower, rightRearPower;
 
     //initializes all the aspects we need to make our robot function
@@ -23,25 +25,13 @@ public class AprilTeleOp extends OpMode {
     @Override
     public void init() {
         telemetry.clearAll();
-        // defining all the hardware
-        //Wheels
-        leftFront = hardwareMap.get(DcMotorEx.class, "lf");
-        leftRear = hardwareMap.get(DcMotorEx.class, "lr");
-        rightRear = hardwareMap.get(DcMotorEx.class, "rr");
-        rightFront = hardwareMap.get(DcMotorEx.class, "rf");
-        // PTO
-        carin = hardwareMap.get(DcMotorEx.class, "carin");
-        //Arm
-        linx = hardwareMap.get(DcMotorEx.class, "linx");
-        hopper = hardwareMap.get(Servo.class, "hopper");
-        //Reversing inverted motors
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
         telemetry.addLine("Ready to Deploy Teleop");
         telemetry.update();
     }
     @Override
     public void loop() {
+        vector = new SampleMecanumDrive(hardwareMap);
+
         telemetry.clearAll();
         telemetry.addLine("Running Teleop");
         telemetry.update();
@@ -64,47 +54,47 @@ public class AprilTeleOp extends OpMode {
 
         // Brake motors when not used
         if (gamepad1.left_stick_y <= 0.1 && gamepad1.left_trigger <= 0.1 && gamepad1.right_trigger <= 0.1) {
-            rightFront.setPower(0);
-            leftRear.setPower(0);
+            vector.rightFront.setPower(0);
+            vector.leftRear.setPower(0);
         }
 
         // Brake motors when not used
         if (gamepad1.right_stick_x <= 0.1 && gamepad1.left_trigger <= 0.1 && gamepad1.right_trigger <= 0.1) {
-            leftFront.setPower(0);
-            rightRear.setPower(0);
+            vector.leftFront.setPower(0);
+            vector.rightRear.setPower(0);
         }
 
-        leftRear.setPower(leftRearPower);
-        leftFront.setPower(leftFrontPower);
-        rightRear.setPower(rightRearPower);
-        rightFront.setPower(rightFrontPower);
+        vector.leftRear.setPower(leftRearPower);
+        vector.leftFront.setPower(leftFrontPower);
+        vector.rightRear.setPower(rightRearPower);
+        vector.rightFront.setPower(rightFrontPower);
 
         if(gamepad2.dpad_up == true) {
-            hopper.setPosition(0.6);
+            vector.hopper.setPosition(0.6);
 
          }else if(gamepad2.dpad_left == true || gamepad2.dpad_right == true) {
-            hopper.setPosition(0.8);
+            vector.hopper.setPosition(0.8);
 
         }else if(gamepad2.dpad_down == true) {
-            hopper.setPosition(1.0);
+            vector.hopper.setPosition(1.0);
 
         } else if(gamepad2.b == true) {
-            hopper.setPosition(0);
-            carin.setPower(1);
+            vector.hopper.setPosition(0);
+            vector.carin.setPower(1);
 
         } else if(gamepad2.x == true) {
-            hopper.setPosition(0);
-            carin.setPower(-1);
+            vector.hopper.setPosition(0);
+            vector.carin.setPower(-1);
 
         } else if(gamepad2.right_trigger > 0) {
-            carin.setPower(gamepad2.right_trigger*0.5);
+            vector.carin.setPower(gamepad2.right_trigger*0.5);
 
         } else if(gamepad2.left_trigger > 0) {
-            carin.setPower(-gamepad2.left_trigger);
+            vector.carin.setPower(-gamepad2.left_trigger);
 
         } else {
-            hopper.setPosition(0.25);
-            carin.setPower(0);
+            vector.hopper.setPosition(0.25);
+            vector.carin.setPower(0);
         }
 /*
         //Get the encoder position for the arm
@@ -122,7 +112,7 @@ public class AprilTeleOp extends OpMode {
         linx.setPower(armPow);
 
  */
-        linx.setPower(0.4);
+        vector.linx.setPower(0.5);
     }
 
     @Override
