@@ -115,13 +115,7 @@ public class AprilAuto_BC extends LinearOpMode
                 {
                     telemetry.addLine("Tag of interest is in sight!\n\nLocation data:");
                     tagToTelemetry(tagOfInterest);
-                    if(tagOfInterest.pose.x*FEET_PER_METER > 0.1) {
-                        caseLeft();
 
-                    } else if (tagOfInterest.pose.x*FEET_PER_METER < -0.1) {
-                        caseMiddle();
-
-                    }
                 }
                 else
                 {
@@ -130,7 +124,7 @@ public class AprilAuto_BC extends LinearOpMode
                     if(tagOfInterest == null)
                     {
                         telemetry.addLine("(The tag has never been seen)");
-                        caseRight();
+
                     }
                     else
                     {
@@ -146,7 +140,7 @@ public class AprilAuto_BC extends LinearOpMode
 
                 if(tagOfInterest == null)
                 {
-                    caseRight();
+
                     telemetry.addLine("(The tag has never been seen)");
                 }
                 else
@@ -186,6 +180,7 @@ public class AprilAuto_BC extends LinearOpMode
              * Insert your autonomous code here, presumably running some default configuration
              * since the tag was never sighted during INIT
              */
+            caseRight();
         }
         else
         {
@@ -193,26 +188,24 @@ public class AprilAuto_BC extends LinearOpMode
              * Insert your autonomous code here, probably using the tag pose to decide your configuration.
              */
 
-            // e.g.
-            if(tagOfInterest.pose.x <= 20)
+            if(tagOfInterest.pose.x*FEET_PER_METER <= 0.1)
             {
                 // do something
+                caseLeft();
             }
-            else if(tagOfInterest.pose.x >= 20 && tagOfInterest.pose.x <= 50)
+            else
             {
                 // do something else
-            }
-            else if(tagOfInterest.pose.x >= 50)
-            {
-                // do something else
+                caseMiddle();
             }
         }
 
 
         /* You wouldn't have this in your autonomous, this is just to prevent the sample from ending */
-        while (opModeIsActive()) {sleep(20);}
+        //while (opModeIsActive()) {sleep(20);}
     }
 
+    // Display active positions of Apriltag pose
     void tagToTelemetry(AprilTagDetection detection)
     {
         telemetry.addLine(String.format("\nDetected tag ID=%d", detection.id));
@@ -224,6 +217,20 @@ public class AprilAuto_BC extends LinearOpMode
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
 
+    // Sample Roadrunner Movement
+
+    //  Trajectory strafePosOne = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+    //          .lineToLinearHeading(new Pose2d(15, 15, Math.toRadians(0)))
+    //          .build();
+    //  vector.followTrajectory(strafePosOne);
+
+    //For Roadrunner:
+    //Forward is +x +y
+    //Backward is -x -y
+    //Left is +x -y
+    //Right is -x +y
+
+    //Each method is used for the marker staring position
     public void caseLeft() {
 
     }
@@ -233,24 +240,8 @@ public class AprilAuto_BC extends LinearOpMode
     }
 
     public void caseRight() {
-        Trajectory strafePosOne = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(15, 15, Math.toRadians(0)))
-                .build();
-        vector.followTrajectory(strafePosOne);
 
-        Trajectory strafePosTwo = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(-15, -15, Math.toRadians(0)))
-                .build();
-        vector.followTrajectory(strafePosOne);
 
-        Trajectory strafePosThree = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(15, 0, Math.toRadians(0)))
-                .build();
-        vector.followTrajectory(strafePosOne);
 
-        Trajectory strafePosFour = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(0, 15, Math.toRadians(0)))
-                .build();
-        vector.followTrajectory(strafePosOne);
     }
 }
