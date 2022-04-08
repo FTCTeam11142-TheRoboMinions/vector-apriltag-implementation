@@ -252,12 +252,13 @@ public class AprilAuto_BC extends LinearOpMode
 
         vector.followTrajectory(forwardToHub);
         vector.followTrajectory(strafeToHub);
-        linearExtension(0.5, 1600);
+        linearExtension(0.5, 1500);
         vector.hopper.setPosition(0.75);
         sleep(500);
+        linearExtension(0.5, -750);
         vector.hopper.setPosition(0.25);
-        linearExtension(0.5, -1600);
-        vector.hopper.setPosition(0.1);
+        linearExtension(0.5, -750);
+        vector.turn(Math.toRadians(90));
 
 
     }
