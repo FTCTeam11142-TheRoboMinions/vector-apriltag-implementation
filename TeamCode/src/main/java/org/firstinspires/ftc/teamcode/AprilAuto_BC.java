@@ -26,6 +26,7 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
@@ -188,7 +189,7 @@ public class AprilAuto_BC extends LinearOpMode
              * Insert your autonomous code here, probably using the tag pose to decide your configuration.
              */
 
-            if(tagOfInterest.pose.x*FEET_PER_METER <= 0.1)
+            if(tagOfInterest.pose.x*FEET_PER_METER <= 0)
             {
                 // do something
                 caseLeft();
@@ -241,7 +242,38 @@ public class AprilAuto_BC extends LinearOpMode
 
     public void caseRight() {
 
+        Trajectory forwardToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                  .lineToLinearHeading(new Pose2d(7.5, 7.5, Math.toRadians(0)))
+                  .build();
+        Trajectory strafeToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(15, -15, Math.toRadians(0)))
+                .build();
 
 
+        vector.followTrajectory(forwardToHub);
+        vector.followTrajectory(strafeToHub);
+        linearExtension(0.5, 1600);
+        vector.hopper.setPosition(0.75);
+        sleep(500);
+        vector.hopper.setPosition(0.25);
+        linearExtension(0.5, -1600);
+        vector.hopper.setPosition(0.1);
+
+
+    }
+
+    public void linearExtension (double velocity, int position) {
+        //reset encoder
+        vector.linx.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //set target position
+        vector.linx.setTargetPosition(position);
+        vector.linx.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //set power
+        vector.linx.setPower(velocity);
+
+           while (vector.linx.isBusy()){
+
+          }
+          vector.linx.setPower(0);
     }
 }
