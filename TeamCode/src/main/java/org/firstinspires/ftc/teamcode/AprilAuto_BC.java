@@ -257,6 +257,7 @@ public class AprilAuto_BC extends LinearOpMode
         sleep(500);
         linearExtension(0.5, -750);
         vector.hopper.setPosition(0.25);
+        sleep(500);
         linearExtension(0.5, -750);
         vector.turn(Math.toRadians(90));
 
