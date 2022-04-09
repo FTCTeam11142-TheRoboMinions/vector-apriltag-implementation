@@ -259,7 +259,6 @@ public class AprilAuto_BC extends LinearOpMode
         vector.hopper.setPosition(0.25);
         sleep(500);
         linearExtension(0.5, -750);
-        vector.turn(Math.toRadians(90));
 
 
     }
@@ -278,4 +277,14 @@ public class AprilAuto_BC extends LinearOpMode
           }
           vector.linx.setPower(0);
     }
+
+    public void carouselCycle () {
+        vector.carin.setPower(0.5);
+        sleep(1000);
+        vector.carin.setPower(0.25);
+        sleep(1500);
+        vector.linx.setPower(0);
+    }
+
+
 }
