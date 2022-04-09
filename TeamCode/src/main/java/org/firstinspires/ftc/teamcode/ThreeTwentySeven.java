@@ -79,14 +79,16 @@ public class ThreeTwentySeven extends OpMode {
         //Arm and Carousel
 
         if (gamepad2.left_trigger > 0.05){
-            inCarPow = 0.8;
+            inCarPow = 1;
             boxPos = 0;
         }
         else if (gamepad2.right_trigger > 0.05){
-            inCarPow = -0.8;
+            inCarPow = -1;
         }
         else if (gamepad2.a){
-            boxPos = .95;
+            boxPos = .7;
+            freight = false;
+
         }
         else{
             boxPos = .25;
@@ -114,7 +116,7 @@ public class ThreeTwentySeven extends OpMode {
 
         if (level3){
             armPow = 0.9;
-            if (linSlide.getCurrentPosition() >= (1650+linBase)){
+            if (linSlide.getCurrentPosition() >= (1475+linBase)){
                 armPow = 0;
                 level3 = false;
             }
