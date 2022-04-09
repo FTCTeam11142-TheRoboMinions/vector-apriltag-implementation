@@ -27,6 +27,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -192,6 +193,8 @@ public class AprilAuto_BC extends LinearOpMode
              * Insert your autonomous code here, probably using the tag pose to decide your configuration.
              */
 
+
+            // left of camera is negative, right is positive pose
             if(tagOfInterest.pose.x*FEET_PER_METER <= 0)
             {
                 // do something
@@ -221,14 +224,14 @@ public class AprilAuto_BC extends LinearOpMode
         telemetry.addLine(String.format("Rotation Roll: %.2f degrees", Math.toDegrees(detection.pose.roll)));
     }
 
-    // Sample Roadrunner Movement
+    // Sample Roadrunner Movement >>>
 
     //  Trajectory strafePosOne = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
     //          .lineToLinearHeading(new Pose2d(15, 15, Math.toRadians(0)))
     //          .build();
     //  vector.followTrajectory(strafePosOne);
 
-    //For Roadrunner:
+    //For Roadrunner Trajectories:
     //Forward is +x +y
     //Backward is -x -y
     //Left is +x -y
@@ -348,6 +351,65 @@ public class AprilAuto_BC extends LinearOpMode
             telemetry.addData("b X Power:", vector.rightRear.getPower());
             telemetry.update();
         }
+        //stop all motors after reaching position
+        vector.rightFront.setPower(0);
+        vector.leftFront.setPower(0);
+        vector.leftRear.setPower(0);
+        vector.rightRear.setPower(0);
+    }
+
+    public void vectorCorrect(double correctTo){
+        vector.targetHeading = (correctTo);
+        ElapsedTime runtime = new ElapsedTime();
+        runtime.reset();
+        while((runtime.seconds() < 2.0) &&((vector.absHeading-vector.targetHeading)>2 || (vector.absHeading-vector.targetHeading)<-2)){
+            vector.angles = vector.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("Heading", vector.angles.firstAngle);
+            telemetry.addData("Target", vector.targetHeading);
+            vector.absHeading = vector.angles.firstAngle;
+            vector.leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            vector.rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            if((vector.absHeading-vector.targetHeading) > 0){
+                double fXPow = (0.25 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (fXPow > 0.6){
+                    fXPow = 0.6;
+                }
+                else if (fXPow < -0.6){
+                    fXPow = -0.6;
+                }
+                double bXPow = (-0.25 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (bXPow > 0.6){
+                    bXPow = 0.6;
+                }
+                else if (bXPow < -0.6){
+                    bXPow = -0.6;
+                }
+                vector.leftFront.setPower(fXPow);
+                vector.rightRear.setPower(bXPow);
+            }
+            else if((vector.absHeading-vector.targetHeading < 0)){
+                double fXPow = (-0.25 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (fXPow > 0.6){
+                    fXPow = 0.6;
+                }
+                else if (fXPow < -0.6){
+                    fXPow = -0.6;
+                }
+                double bXPow = (0.25 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (bXPow > 0.6){
+                    bXPow = 0.6;
+                }
+                else if (bXPow < -0.6){
+                    bXPow = -0.6;
+                }
+                vector.leftFront.setPower(fXPow);
+                vector.rightRear.setPower(bXPow);
+            }
+            telemetry.addData("Front X Power:", vector.leftFront.getPower());
+            telemetry.addData("Back X Power:", vector.rightRear.getPower());
+            telemetry.update();
+        }
+        //stop all motors after reaching position
         vector.rightFront.setPower(0);
         vector.leftFront.setPower(0);
         vector.leftRear.setPower(0);
@@ -357,7 +419,8 @@ public class AprilAuto_BC extends LinearOpMode
     public void linearExtension (double velocity, int position) {
         //reset encoder
         vector.linx.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        //set target position
+        //set target position between limits 0 to 1500
+        //set negative position with positive power to reverse slide direction
         vector.linx.setTargetPosition(position);
         vector.linx.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //set power
@@ -370,8 +433,10 @@ public class AprilAuto_BC extends LinearOpMode
     }
 
     public void carouselCycle () {
+        //accelerate carousel wheel
         vector.carin.setPower(0.5);
         sleep(1000);
+        //slow down carousel wheel so duck is not launched
         vector.carin.setPower(0.25);
         sleep(1500);
         vector.linx.setPower(0);
