@@ -79,12 +79,12 @@ public class SampleMecanumDrive extends MecanumDrive {
     public DcMotor carin, linx;
     public Servo hopper;
 
-
     public BNO055IMU imu;
     public Orientation angles;
-    public double absHeading = 0.0;
+    public double absHeading;
     public double originalHeading = 0.0;
-    public double targetHeading = 0;
+    public double targetHeading = 0.0;
+    public int errorScaler = 35;
 
     private VoltageSensor batteryVoltageSensor;
 
@@ -107,6 +107,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
         imu.initialize(parameters);
+
 
         // TODO: If the hub containing the IMU you are using is mounted so that the "REV" logo does
         // not face up, remap the IMU axes so that the z-axis points upward (normal to the floor.)
@@ -139,6 +140,8 @@ public class SampleMecanumDrive extends MecanumDrive {
         hopper = hardwareMap.get(Servo.class, "hopper");
 
         hopper.setPosition(0.25);
+
+
 
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);

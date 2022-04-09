@@ -29,6 +29,9 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -261,6 +264,94 @@ public class AprilAuto_BC extends LinearOpMode
         linearExtension(0.5, -750);
 
 
+    }
+
+    public void vectorDrive (double inPower, double Xdistance, double Ydistance) {
+        //reset
+        vector.rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vector.leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vector.leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vector.rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        //target position
+        vector.rightFront.setTargetPosition((int)Ydistance*50);
+        vector.leftRear.setTargetPosition((int)Ydistance*50);
+        vector.leftFront.setTargetPosition(-(int)Xdistance*50);
+        vector.rightRear.setTargetPosition(-(int)Xdistance*50);
+
+        vector.rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        vector.leftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        vector.leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        vector.rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        //set power
+        if(Xdistance == 0){
+            vector.rightFront.setPower(inPower);
+            vector.leftRear.setPower(inPower);
+        }
+        else if(Ydistance == 0){
+            vector.leftFront.setPower(inPower);
+            vector.rightRear.setPower(inPower);
+        }
+        else{
+            vector.rightFront.setPower(inPower);
+            vector.leftRear.setPower(inPower);
+            vector.leftFront.setPower(inPower);
+            vector.rightRear.setPower(inPower);
+        }
+
+        //Active Gyroscopic corrections while running to position
+        while (vector.leftFront.isBusy() || vector.rightRear.isBusy() || vector.rightFront.isBusy() || vector.leftRear.isBusy()) {
+            vector.angles = vector.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("Heading", vector.angles.firstAngle);
+            telemetry.addData("Target", vector.targetHeading);
+            vector.absHeading = vector.angles.firstAngle;
+            //Standard Correction of each wheel by adding weighted power
+            vector.rightFront.setPower(inPower + ((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+            vector.leftRear.setPower(inPower - ((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+            vector.leftFront.setPower(inPower - ((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+            vector.rightRear.setPower(inPower + ((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+            /*
+            //Out of Bounds Correction
+            if((absHeading-targetHeading)>5 || (absHeading-targetHeading)<-5){
+                StopDriving(); //Stop robot to correct to prevent major course alterations
+                while((absHeading-targetHeading)>2 || (absHeading-targetHeading)<-2){
+                    if(vector.leftFront.getTargetPosition() <= vector.leftFront.getCurrentPosition() && vector.rightRear.getTargetPosition() <= vector.rightRear.getCurrentPosition()){
+                        vector.leftFront.setMode(RunMode.RUN_WITHOUT_ENCODER);
+                        vector.rightRear.setMode(RunMode.RUN_WITHOUT_ENCODER);
+                    }
+                    if((absHeading-targetHeading) > 0){
+                        vector.leftFront.setPower(0.15 + ((absHeading-targetHeading)/errorScaler));
+                        vector.rightRear.setPower(-0.15 - ((absHeading-targetHeading)/errorScaler));
+                    }
+                    else if((absHeading-targetHeading < 0)){
+                        vector.leftFront.setPower(-0.15 + ((absHeading-targetHeading)/errorScaler));
+                        vector.rightRear.setPower(0.15 - ((absHeading-targetHeading)/errorScaler));
+                    }
+                    telemetry.addData("Front X Power:", vector.leftFront.getPower());
+                    telemetry.addData("Back X Power:", vector.rightRear.getPower());
+                    telemetry.update();
+                }
+
+            }*/
+            telemetry.addData("f X current:", vector.leftFront.getCurrentPosition());
+            telemetry.addData("b X current:", vector.rightRear.getCurrentPosition());
+            telemetry.addData("f Y current:", vector.rightFront.getCurrentPosition());
+            telemetry.addData("b Y current:", vector.leftRear.getCurrentPosition());
+            telemetry.addData("f X target:", vector.leftFront.getTargetPosition());
+            telemetry.addData("b X target:", vector.rightRear.getTargetPosition());
+            telemetry.addData("f Y target:", vector.rightFront.getTargetPosition());
+            telemetry.addData("b Y target:", vector.leftRear.getTargetPosition());
+            telemetry.addData("f Y Power:", vector.rightFront.getPower());
+            telemetry.addData("b Y Power:", vector.leftRear.getPower());
+            telemetry.addData("f X Power:", vector.leftFront.getPower());
+            telemetry.addData("b X Power:", vector.rightRear.getPower());
+            telemetry.update();
+        }
+        vector.rightFront.setPower(0);
+        vector.leftFront.setPower(0);
+        vector.leftRear.setPower(0);
+        vector.rightRear.setPower(0);
     }
 
     public void linearExtension (double velocity, int position) {
