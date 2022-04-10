@@ -258,10 +258,10 @@ public class AprilAuto_BC extends LinearOpMode
                 .lineToLinearHeading(new Pose2d(15, -15, Math.toRadians(0)))
                 .build();
         Trajectory forwardToWarehouse = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(30, 30, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(-30, -30, Math.toRadians(0)))
                 .build();
         Trajectory postCollection = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(-30, -30, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(30, 30, Math.toRadians(0)))
                 .build();
 
 
@@ -444,40 +444,40 @@ public class AprilAuto_BC extends LinearOpMode
             vector.leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             vector.rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             if((vector.absHeading-vector.targetHeading) > 0){
-                double fXPow = (0.25 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (fXPow > 0.6){
-                    fXPow = 0.6;
+                double fXPow = (0.1 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (fXPow > 0.5){
+                    fXPow = 0.5;
                 }
-                else if (fXPow < -0.6){
-                    fXPow = -0.6;
+                else if (fXPow < -0.5){
+                    fXPow = -0.5;
                 }
-                double bXPow = (-0.25 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (bXPow > 0.6){
-                    bXPow = 0.6;
+                double bXPow = (-0.1 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (bXPow > 0.5){
+                    bXPow = 0.5;
                 }
-                else if (bXPow < -0.6){
-                    bXPow = -0.6;
+                else if (bXPow < -0.5){
+                    bXPow = -0.5;
                 }
                 vector.leftFront.setPower(fXPow);
                 vector.rightRear.setPower(bXPow);
             }
             else if((vector.absHeading-vector.targetHeading < 0)){
-                double fXPow = (-0.2 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (fXPow > 0.6){
-                    fXPow = 0.6;
+                double fXPow = (-0.1 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (fXPow > 0.5){
+                    fXPow = 0.5;
                 }
-                else if (fXPow < -0.6){
-                    fXPow = -0.6;
+                else if (fXPow < -0.5){
+                    fXPow = -0.5;
                 }
-                double bXPow = (0.2 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (bXPow > 0.6){
-                    bXPow = 0.6;
+                double bXPow = (0.1 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (bXPow > 0.5){
+                    bXPow = 0.5;
                 }
-                else if (bXPow < -0.6){
-                    bXPow = -0.6;
+                else if (bXPow < -0.5){
+                    bXPow = -0.5;
                 }
-                vector.leftFront.setPower(fXPow);
-                vector.rightRear.setPower(bXPow);
+                vector.leftFront.setPower(-fXPow);
+                vector.rightRear.setPower(-bXPow);
             }
             telemetry.addData("Front X Power:", vector.leftFront.getPower());
             telemetry.addData("Back X Power:", vector.rightRear.getPower());
