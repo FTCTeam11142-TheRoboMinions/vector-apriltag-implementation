@@ -254,17 +254,37 @@ public class AprilAuto_BC extends LinearOpMode
         Trajectory strafeToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
                 .lineToLinearHeading(new Pose2d(15, -15, Math.toRadians(0)))
                 .build();
+        Trajectory strafeToWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(15, -15, Math.toRadians(0)))
+                .build();
+        Trajectory forwardToWarehouse = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(30, 30, Math.toRadians(0)))
+                .build();
+        Trajectory postCollection = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-30, -30, Math.toRadians(0)))
+                .build();
 
 
         vector.followTrajectory(forwardToHub);
         vector.followTrajectory(strafeToHub);
-        linearExtension(0.5, 1500);
-        vector.hopper.setPosition(0.75);
-        sleep(500);
-        linearExtension(0.5, -750);
+        highDeposit();
+        vectorTurn(90);
+        vector.followTrajectory(strafeToWall);
+        vector.carin.setPower(1);
+        vector.followTrajectory(forwardToWarehouse);
         vector.hopper.setPosition(0.25);
         sleep(500);
-        linearExtension(0.5, -750);
+        vector.carin.setPower(-1);
+        sleep(500);
+        vector.carin.setPower(0);
+        vector.followTrajectory(postCollection);
+        vectorTurn(-90);
+        highDeposit();
+
+
+
+
+
 
 
     }
@@ -360,9 +380,63 @@ public class AprilAuto_BC extends LinearOpMode
 
     public void vectorCorrect(double correctTo){
         vector.targetHeading = (correctTo);
-        ElapsedTime runtime = new ElapsedTime();
-        runtime.reset();
-        while((runtime.seconds() < 2.0) &&((vector.absHeading-vector.targetHeading)>2 || (vector.absHeading-vector.targetHeading)<-2)){
+        while((vector.absHeading-vector.targetHeading)>2.5 || (vector.absHeading-vector.targetHeading)<-2.5){
+            vector.angles = vector.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("Heading", vector.angles.firstAngle);
+            telemetry.addData("Target", vector.targetHeading);
+            vector.absHeading = vector.angles.firstAngle;
+            vector.leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            vector.rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            if((vector.absHeading-vector.targetHeading) > 0){
+                double fXPow = (0.1 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (fXPow > 0.5){
+                    fXPow = 0.5;
+                }
+                else if (fXPow < -0.5){
+                    fXPow = -0.5;
+                }
+                double bXPow = (-0.1 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (bXPow > 0.5){
+                    bXPow = 0.5;
+                }
+                else if (bXPow < -0.5){
+                    bXPow = -0.5;
+                }
+                vector.leftFront.setPower(fXPow);
+                vector.rightRear.setPower(bXPow);
+            }
+            else if((vector.absHeading-vector.targetHeading < 0)){
+                double fXPow = (-0.1 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (fXPow > 0.5){
+                    fXPow = 0.5;
+                }
+                else if (fXPow < -0.5){
+                    fXPow = -0.5;
+                }
+                double bXPow = (0.1 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                if (bXPow > 0.5){
+                    bXPow = 0.5;
+                }
+                else if (bXPow < -0.5){
+                    bXPow = -0.5;
+                }
+                vector.leftFront.setPower(fXPow);
+                vector.rightRear.setPower(bXPow);
+            }
+            telemetry.addData("Front X Power:", vector.leftFront.getPower());
+            telemetry.addData("Back X Power:", vector.rightRear.getPower());
+            telemetry.update();
+        }
+        //stop all motors after reaching position
+        vector.rightFront.setPower(0);
+        vector.leftFront.setPower(0);
+        vector.leftRear.setPower(0);
+        vector.rightRear.setPower(0);
+    }
+
+    public void vectorTurn (double correctTo){
+        vector.targetHeading = (correctTo);
+        while((vector.absHeading-vector.targetHeading)>2.5 || (vector.absHeading-vector.targetHeading)<-2.5){
             vector.angles = vector.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             telemetry.addData("Heading", vector.angles.firstAngle);
             telemetry.addData("Target", vector.targetHeading);
@@ -388,14 +462,14 @@ public class AprilAuto_BC extends LinearOpMode
                 vector.rightRear.setPower(bXPow);
             }
             else if((vector.absHeading-vector.targetHeading < 0)){
-                double fXPow = (-0.25 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                double fXPow = (-0.2 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
                 if (fXPow > 0.6){
                     fXPow = 0.6;
                 }
                 else if (fXPow < -0.6){
                     fXPow = -0.6;
                 }
-                double bXPow = (0.25 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                double bXPow = (0.2 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
                 if (bXPow > 0.6){
                     bXPow = 0.6;
                 }
@@ -441,6 +515,19 @@ public class AprilAuto_BC extends LinearOpMode
         sleep(1500);
         vector.linx.setPower(0);
     }
+
+    public void highDeposit() {
+        linearExtension(0.5, -1500);
+        vector.hopper.setPosition(0.75);
+        sleep(500);
+        linearExtension(0.5, 750);
+        vector.hopper.setPosition(0.25);
+        sleep(500);
+        linearExtension(0.5, 750);
+        vector.hopper.setPosition(0);
+        sleep(500);
+    }
+
 
 
 }

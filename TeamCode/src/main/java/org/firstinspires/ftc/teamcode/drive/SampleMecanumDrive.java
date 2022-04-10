@@ -77,7 +77,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     public List<DcMotorEx> motors;
 
     public DcMotor carin, linx;
-    public Servo hopper;
+    public Servo hopper, capper;
 
     public BNO055IMU imu;
     public Orientation angles;
@@ -138,8 +138,11 @@ public class SampleMecanumDrive extends MecanumDrive {
         carin = hardwareMap.get(DcMotor.class, "carin");
         linx = hardwareMap.get(DcMotor.class, "linx");
         hopper = hardwareMap.get(Servo.class, "hopper");
+        capper = hardwareMap.get(Servo.class, "capper");
+
 
         hopper.setPosition(0.25);
+        capper.setPosition(0.9);
 
 
 
@@ -165,7 +168,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         // TODO: reverse any motors using DcMotor.setDirection()
         rightFront.setDirection(DcMotor.Direction.REVERSE);                                  //alternating between forward and reverse depending on motor placement
         rightRear.setDirection(DcMotor.Direction.REVERSE);
-        linx.setDirection(DcMotor.Direction.REVERSE);
+       // linx.setDirection(DcMotor.Direction.REVERSE);
 
         linx.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 

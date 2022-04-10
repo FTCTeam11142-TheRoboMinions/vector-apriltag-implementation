@@ -18,7 +18,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 public class ThreeTwentySeven extends OpMode {
     public DcMotor leftFront, leftRear, rightRear, rightFront;
     public DcMotor linSlide, inCar;
-    public Servo box;
+    public Servo box, cap;
     public ColorSensor colorDistance;
     double leftFrontPower, rightFrontPower, leftRearPower, rightRearPower, armPow, inCarPow, boxPos, boxDist, linBase;
     boolean freight = false;
@@ -39,6 +39,8 @@ public class ThreeTwentySeven extends OpMode {
         linSlide = hardwareMap.get(DcMotor.class, "linx");
         inCar = hardwareMap.get(DcMotor.class, "carin");
         box = hardwareMap.get(Servo.class, "hopper");
+        cap = hardwareMap.get(Servo.class, "capper");
+
         colorDistance = hardwareMap.get(ColorSensor.class, "colorDistance");
         //Reversing inverted motors
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -133,6 +135,14 @@ public class ThreeTwentySeven extends OpMode {
                 armPow = 0;
                 level0 = false;
             }
+        }
+
+        if(gamepad2.dpad_down) {
+            cap.setPosition(0.9);
+        } else if (gamepad2.dpad_up) {
+            cap.setPosition(0.0625);
+        } else if (gamepad2.dpad_left || gamepad2.dpad_right) {
+            cap.setPosition(0.5);
         }
 
         //Set power variables to hardware
