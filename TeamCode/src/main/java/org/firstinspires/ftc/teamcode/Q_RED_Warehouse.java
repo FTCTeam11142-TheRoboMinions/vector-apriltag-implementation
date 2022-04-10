@@ -240,37 +240,37 @@ public class Q_RED_Warehouse extends LinearOpMode {
             fX.setMode(RunMode.RUN_WITHOUT_ENCODER);
             bX.setMode(RunMode.RUN_WITHOUT_ENCODER);
             if((absHeading-targetHeading) > 0){
-                double fXPow = (0.25 +((absHeading-targetHeading)/errorScaler));
-                if (fXPow > 0.6){
-                    fXPow = 0.6;
+                double fXPow = (0.1 +((absHeading-targetHeading)/errorScaler));
+                if (fXPow > 0.5){
+                    fXPow = 0.5;
                 }
-                else if (fXPow < -0.6){
-                    fXPow = -0.6;
+                else if (fXPow < -0.5){
+                    fXPow = -0.5;
                 }
-                double bXPow = (-0.25 -((absHeading-targetHeading)/errorScaler));
-                if (bXPow > 0.6){
-                    bXPow = 0.6;
+                double bXPow = (-0.1 -((absHeading-targetHeading)/errorScaler));
+                if (bXPow > 0.5){
+                    bXPow = 0.5;
                 }
-                else if (bXPow < -0.6){
-                    bXPow = -0.6;
+                else if (bXPow < -0.5){
+                    bXPow = -0.5;
                 }
                 fX.setPower(fXPow);
                 bX.setPower(bXPow);
             }
             else if((absHeading-targetHeading < 0)){
-                double fXPow = (-0.2 +((absHeading-targetHeading)/errorScaler));
-                if (fXPow > 0.6){
-                    fXPow = 0.6;
+                double fXPow = (-0.1 +((absHeading-targetHeading)/errorScaler));
+                if (fXPow > 0.5){
+                    fXPow = 0.5;
                 }
-                else if (fXPow < -0.6){
-                    fXPow = -0.6;
+                else if (fXPow < -0.5){
+                    fXPow = -0.5;
                 }
-                double bXPow = (0.2 -((absHeading-targetHeading)/errorScaler));
-                if (bXPow > 0.6){
-                    bXPow = 0.6;
+                double bXPow = (0.1 -((absHeading-targetHeading)/errorScaler));
+                if (bXPow > 0.5){
+                    bXPow = 0.5;
                 }
-                else if (bXPow < -0.6){
-                    bXPow = -0.6;
+                else if (bXPow < -0.5){
+                    bXPow = -0.5;
                 }
                 fX.setPower(fXPow);
                 bX.setPower(bXPow);
