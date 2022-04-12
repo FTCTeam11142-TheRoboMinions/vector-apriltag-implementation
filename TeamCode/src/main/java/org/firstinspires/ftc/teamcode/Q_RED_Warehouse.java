@@ -73,12 +73,11 @@ public class Q_RED_Warehouse extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            Correct(90);
+            Drive(0.2,0,12);
 
         }
     }
     // Power, X, Y
-
     //Freight Left
     public void objectLeft(){
         Drive(0.25, 0, -14 );         //to carousel

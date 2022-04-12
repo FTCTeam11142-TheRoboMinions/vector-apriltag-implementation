@@ -182,8 +182,7 @@ public class AprilAuto_RC extends LinearOpMode
              * Insert your autonomous code here, presumably running some default configuration
              * since the tag was never sighted during INIT
              */
-            //caseRight();
-         vector.carin.setPower(0.25);
+            caseRight();
         }
         else
         {
@@ -250,10 +249,10 @@ public class AprilAuto_RC extends LinearOpMode
                   .lineToLinearHeading(new Pose2d(10, 10, Math.toRadians(0)))
                   .build();
         Trajectory backwardToCarousel = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(-10, -10, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(-7.5, -7.5, Math.toRadians(0)))
                 .build();
         Trajectory strafeToCarousel = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(15, -15, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(17.5, -17.5, Math.toRadians(0)))
                 .build();
         Trajectory forwardToPark = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
                 .lineToLinearHeading(new Pose2d(15, 15, Math.toRadians(0)))
@@ -262,14 +261,16 @@ public class AprilAuto_RC extends LinearOpMode
 
 
         vector.followTrajectory(forwardToHub);
-        vectorTurn(-45);
+        vectorTurn(-30);
         highDeposit();
         vector.followTrajectory(backwardToCarousel);
         vectorTurn(0);
         vector.carin.setPower(0.25);
         vector.followTrajectory(strafeToCarousel);
-        sleep(2000);
+        sleep(2500);
         vector.carin.setPower(0);
+        vectorTurn(5);
+        sleep(500);
         vector.followTrajectory(forwardToPark);
 
 
