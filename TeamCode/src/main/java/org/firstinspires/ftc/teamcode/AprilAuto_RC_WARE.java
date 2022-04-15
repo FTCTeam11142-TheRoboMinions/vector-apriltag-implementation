@@ -41,7 +41,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous
-public class AprilAuto_RC extends LinearOpMode
+public class AprilAuto_RC_WARE extends LinearOpMode
 {
     SampleMecanumDrive vector;
     OpenCvCamera camera;
@@ -245,35 +245,41 @@ public class AprilAuto_RC extends LinearOpMode
     }
 
     public void caseRight() {
+
         Trajectory forwardToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
                   .lineToLinearHeading(new Pose2d(2, 17, Math.toRadians(0)))
                   .build();
         Trajectory toCarousel = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(31, -35, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(31, -37, Math.toRadians(0)))
                 .build();
-
         Trajectory revToCarousel = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(-3, -3, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(-5, -5, Math.toRadians(0)))
                 .build();
-        Trajectory forwardToPark = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(11.3, 11.3, Math.toRadians(0)))
+        Trajectory outFromWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-15, 15, Math.toRadians(0)))
+                .build();
+        Trajectory toSideWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(9.5, -9.5, Math.toRadians(0)))
+                .build();
+        Trajectory toWarehouse = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-50, -53, Math.toRadians(0)))
                 .build();
 
         vector.followTrajectory(forwardToHub);
-        vectorTurn(0);
+        vectorCorrect(0);
         highDeposit();
         vector.followTrajectory(toCarousel);
-        vectorTurn(0);
         vector.carin.setPower(0.4);
         vector.followTrajectory(revToCarousel);
-        vectorTurn(0);
+        vectorCorrect(0);
         sleep(3500);
         vector.carin.setPower(0);
         vectorTurn(0);
         sleep(500);
-        vector.followTrajectory(forwardToPark);
-
-
+        vector.followTrajectory(outFromWall);
+        vectorTurn(90);
+        vector.followTrajectory(toSideWall);
+        vector.followTrajectory(toWarehouse);
     }
 
     public void vectorDrive (double inPower, double Xdistance, double Ydistance) {

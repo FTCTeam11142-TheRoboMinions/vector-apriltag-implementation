@@ -41,7 +41,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous
-public class AprilAuto_RC extends LinearOpMode
+public class AprilAuto_BC extends LinearOpMode
 {
     SampleMecanumDrive vector;
     OpenCvCamera camera;
@@ -246,7 +246,7 @@ public class AprilAuto_RC extends LinearOpMode
 
     public void caseRight() {
         Trajectory forwardToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                  .lineToLinearHeading(new Pose2d(2, 17, Math.toRadians(0)))
+                  .lineToLinearHeading(new Pose2d(20, -7, Math.toRadians(0)))
                   .build();
         Trajectory toCarousel = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
                 .lineToLinearHeading(new Pose2d(31, -35, Math.toRadians(0)))

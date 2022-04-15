@@ -148,7 +148,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
 
         hopper.setPosition(0.25);
-        capper.setPosition(0.9);
+        capper.setPosition(0.91);
 
 
 

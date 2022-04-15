@@ -286,7 +286,7 @@ public class AprilAuto_RW extends LinearOpMode
 
         vector.capper.setPosition(0.7);
         vector.followTrajectory(diagonal);
-        vectorTurn(0);
+        vectorCorrect(0);
         highDeposit();
         vectorTurn(90);
         vector.followTrajectory(strafeToWall);
@@ -301,7 +301,7 @@ public class AprilAuto_RW extends LinearOpMode
         vector.followTrajectory(strafeToWall);
         vector.followTrajectory(postCollection);
         vector.followTrajectory(outFromWall);
-        vectorTurn(45);
+        vectorTurn(50);
         vector.followTrajectory(toHub);
         highDeposit();
         vectorTurn(90);
@@ -377,7 +377,7 @@ public class AprilAuto_RW extends LinearOpMode
 
     public void vectorCorrect(double correctTo){
         vector.targetHeading = (correctTo);
-        while((vector.absHeading-vector.targetHeading)>2.5 || (vector.absHeading-vector.targetHeading)<-2.5){
+        while((vector.absHeading-vector.targetHeading)>1.5 || (vector.absHeading-vector.targetHeading)<-1.5){
             vector.angles = vector.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
             telemetry.addData("Heading", vector.angles.firstAngle);
             telemetry.addData("Target", vector.targetHeading);
@@ -385,14 +385,14 @@ public class AprilAuto_RW extends LinearOpMode
             vector.leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             vector.rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             if((vector.absHeading-vector.targetHeading) > 0){
-                double fXPow = (0.1 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                double fXPow = (0.15 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
                 if (fXPow > 0.5){
                     fXPow = 0.5;
                 }
                 else if (fXPow < -0.5){
                     fXPow = -0.5;
                 }
-                double bXPow = (-0.1 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
+                double bXPow = (-0.15 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
                 if (bXPow > 0.5){
                     bXPow = 0.5;
                 }
@@ -435,7 +435,7 @@ public class AprilAuto_RW extends LinearOpMode
             vector.targetHeading = (correctTo);
         ElapsedTime runtime = new ElapsedTime();
         runtime.reset();
-        while((runtime.seconds() < 1.5) && ((vector.absHeading-vector.targetHeading)>2.5 || (vector.absHeading-vector.targetHeading)<-2.5)){
+        while((runtime.seconds() < 1.5) && ((vector.absHeading-vector.targetHeading)>2 || (vector.absHeading-vector.targetHeading)<-2)){
                 vector.angles = vector.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
                 telemetry.addData("Heading", vector.angles.firstAngle);
                 telemetry.addData("Target", vector.targetHeading);
@@ -524,12 +524,11 @@ public class AprilAuto_RW extends LinearOpMode
     public void highDeposit() {
         linearExtension(0.8, -1500);
         vector.hopper.setPosition(0.825);
-        sleep(500);
+        sleep(300);
         linearExtension(0.8, 100);
-        vector.hopper.setPosition(0.25);
-        linearExtension(0.8, 1500);
         vector.hopper.setPosition(0);
-        sleep(500);
+        linearExtension(0.8, 1450);
+        //vector.hopper.setPosition(0.05);
     }
 
     public void sense(){
@@ -541,7 +540,7 @@ public class AprilAuto_RW extends LinearOpMode
                 telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) vector.colorDistance).getDistance(DistanceUnit.CM));
                 vector.boxDist = ((DistanceSensor) vector.colorDistance).getDistance(DistanceUnit.CM);
                 telemetry.update();
-                if (vector.boxDist < 5.75) {
+                if (vector.boxDist < 6) {
                     vector.freight = true;
                     vector.hopper.setPosition(0.25);
                 }

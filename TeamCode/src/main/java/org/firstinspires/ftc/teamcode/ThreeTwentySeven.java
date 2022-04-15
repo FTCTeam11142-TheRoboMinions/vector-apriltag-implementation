@@ -61,10 +61,10 @@ public class ThreeTwentySeven extends OpMode {
             telemetry.update();
         }
         //Motor Variable Powers
-        leftFrontPower = gamepad1.right_stick_x*.8;
-        leftRearPower = gamepad1.left_stick_y*.8;
-        rightFrontPower = gamepad1.left_stick_y*.8;
-        rightRearPower = gamepad1.right_stick_x*.8;
+        leftFrontPower = gamepad1.right_stick_x;
+        leftRearPower = gamepad1.left_stick_y;
+        rightFrontPower = gamepad1.left_stick_y;
+        rightRearPower = gamepad1.right_stick_x;
         armPow = -gamepad2.left_stick_y*0.5;
 
         if (gamepad1.left_trigger > 0.1) {
@@ -133,6 +133,10 @@ public class ThreeTwentySeven extends OpMode {
                 armPow = 0;
                 level0 = false;
             }
+        }
+
+        if(gamepad2.back){
+            linBase = linSlide.getCurrentPosition();
         }
 
         //Set power variables to hardware
