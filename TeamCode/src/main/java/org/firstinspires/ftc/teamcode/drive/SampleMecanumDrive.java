@@ -20,6 +20,7 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityCons
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -78,13 +79,17 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public DcMotor carin, linx;
     public Servo hopper, capper;
+    public ColorSensor colorDistance;
 
     public BNO055IMU imu;
     public Orientation angles;
     public double absHeading;
     public double originalHeading = 0.0;
     public double targetHeading = 0.0;
+    public double boxDist;
     public int errorScaler = 35;
+    public int DriveScaler = 105;
+    public boolean freight = false;
 
     private VoltageSensor batteryVoltageSensor;
 
@@ -139,6 +144,7 @@ public class SampleMecanumDrive extends MecanumDrive {
         linx = hardwareMap.get(DcMotor.class, "linx");
         hopper = hardwareMap.get(Servo.class, "hopper");
         capper = hardwareMap.get(Servo.class, "capper");
+        colorDistance = hardwareMap.get(ColorSensor.class, "colorDistance");
 
 
         hopper.setPosition(0.25);
@@ -159,7 +165,7 @@ public class SampleMecanumDrive extends MecanumDrive {
             setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
 
-        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
         if (RUN_USING_ENCODER && MOTOR_VELO_PID != null) {
             setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
