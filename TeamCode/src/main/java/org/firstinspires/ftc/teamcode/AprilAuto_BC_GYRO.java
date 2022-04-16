@@ -23,15 +23,19 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -41,9 +45,21 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 import java.util.ArrayList;
 
 @Autonomous
-public class AprilAuto_BC extends LinearOpMode
+public class AprilAuto_BC_GYRO extends LinearOpMode
 {
-    SampleMecanumDrive vector;
+    DcMotor fY, fX, bY, bX, linSlide, inCar;
+    Servo box, cap;
+    double fYPower = 0;
+    double bYPower = 0;
+
+    //Gyroscope Initialization
+    private BNO055IMU imu;
+    double absHeading;
+    Orientation angles;
+    double targetHeading = 0;
+    int errorScaler = 105;
+    int YScaler = 15;
+    int XScaler = 10;
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
@@ -68,7 +84,32 @@ public class AprilAuto_BC extends LinearOpMode
     @Override
     public void runOpMode()
     {
-        vector = new SampleMecanumDrive(hardwareMap);
+        fY = hardwareMap.dcMotor.get("rf");
+        bY = hardwareMap.dcMotor.get("lr");
+        fX = hardwareMap.dcMotor.get("lf");
+        bX = hardwareMap.dcMotor.get("rr");
+        linSlide = hardwareMap.get(DcMotor.class, "linx");
+        inCar = hardwareMap.get(DcMotor.class, "carin");
+        box = hardwareMap.get(Servo.class, "hopper");
+        cap = hardwareMap.get(Servo.class, "capper");
+        fY.setDirection(DcMotorSimple.Direction.REVERSE);
+        bX.setDirection(DcMotorSimple.Direction.REVERSE);
+        fX.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fY.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bX.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bY.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fY.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bY.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        fX.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        bX.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //Gyroscope parameters
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        imu.initialize(parameters);
+
+        box.setPosition(0.25);
+        cap.setPosition(0.91);
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "webcam"), cameraMonitorViewId);
@@ -245,6 +286,7 @@ public class AprilAuto_BC extends LinearOpMode
     }
 
     public void caseRight() {
+        /*
         Trajectory forwardToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
                   .lineToLinearHeading(new Pose2d(30, -17, Math.toRadians(0)))
                   .build();
@@ -273,261 +315,274 @@ public class AprilAuto_BC extends LinearOpMode
         vectorTurn(0);
         sleep(500);
         vector.followTrajectory(forwardToPark);
-
-
+        */
+        Drive(0.6,0, 8);
+        vectorTurn(0);
+        Drive(0.6,-37, 0);
+        vectorTurn(0);
+        Drive(0.6,0, 8);
+        vectorTurn(0);
+        highDeposit();
+        Drive(0.4,65,0);
+        vectorTurn(0);
+        inCar.setPower(0.4);
+        Drive(0.3,0,-15);
+        vectorTurn(0);
+        sleep(3500);
+        inCar.setPower(0);
+        sleep(500);
+        Drive(0.6,0,11.3);
     }
 
-    public void vectorDrive (double inPower, double Xdistance, double Ydistance) {
+    public void Drive (double inPower, double Xdistance, double Ydistance) {
         //reset
-        vector.rightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vector.leftRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vector.leftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        vector.rightRear.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fY.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bY.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fX.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bX.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //target position
-        vector.rightFront.setTargetPosition((int)Ydistance*50);
-        vector.leftRear.setTargetPosition((int)Ydistance*50);
-        vector.leftFront.setTargetPosition(-(int)Xdistance*50);
-        vector.rightRear.setTargetPosition(-(int)Xdistance*50);
+        fY.setTargetPosition((int)Ydistance*50);
+        bY.setTargetPosition((int)Ydistance*50);
+        fX.setTargetPosition(-(int)Xdistance*50);
+        bX.setTargetPosition(-(int)Xdistance*50);
 
-        vector.rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        vector.leftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        vector.leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        vector.rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fY.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bY.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fX.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bX.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         //set power
         if(Xdistance == 0){
-            vector.rightFront.setPower(inPower);
-            vector.leftRear.setPower(inPower);
+            fY.setPower(inPower);
+            bY.setPower(inPower);
         }
         else if(Ydistance == 0){
-            vector.leftFront.setPower(inPower);
-            vector.rightRear.setPower(inPower);
+            fX.setPower(inPower);
+            bX.setPower(inPower);
         }
         else{
-            vector.rightFront.setPower(inPower);
-            vector.leftRear.setPower(inPower);
-            vector.leftFront.setPower(inPower);
-            vector.rightRear.setPower(inPower);
+            fY.setPower(inPower);
+            bY.setPower(inPower);
+            fX.setPower(inPower);
+            bX.setPower(inPower);
         }
 
         //Active Gyroscopic corrections while running to position
-        while (vector.leftFront.isBusy() || vector.rightRear.isBusy() || vector.rightFront.isBusy() || vector.leftRear.isBusy()) {
-            vector.angles = vector.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            telemetry.addData("Heading", vector.angles.firstAngle);
-            telemetry.addData("Target", vector.targetHeading);
-            vector.absHeading = vector.angles.firstAngle;
+        while (fX.isBusy() || bX.isBusy() || fY.isBusy() || bY.isBusy()) {
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("Heading", angles.firstAngle);
+            telemetry.addData("Target", targetHeading);
+            absHeading = angles.firstAngle;
             //Standard Correction of each wheel by adding weighted power
-            vector.rightFront.setPower(inPower + ((vector.absHeading-vector.targetHeading)/vector.DriveScaler));
-            vector.leftRear.setPower(inPower - ((vector.absHeading-vector.targetHeading)/vector.DriveScaler));
-            vector.leftFront.setPower(inPower - ((vector.absHeading-vector.targetHeading)/vector.DriveScaler));
-            vector.rightRear.setPower(inPower + ((vector.absHeading-vector.targetHeading)/vector.DriveScaler));
-            telemetry.addData("f X current:", vector.leftFront.getCurrentPosition());
-            telemetry.addData("b X current:", vector.rightRear.getCurrentPosition());
-            telemetry.addData("f Y current:", vector.rightFront.getCurrentPosition());
-            telemetry.addData("b Y current:", vector.leftRear.getCurrentPosition());
-            telemetry.addData("f X target:", vector.leftFront.getTargetPosition());
-            telemetry.addData("b X target:", vector.rightRear.getTargetPosition());
-            telemetry.addData("f Y target:", vector.rightFront.getTargetPosition());
-            telemetry.addData("b Y target:", vector.leftRear.getTargetPosition());
-            telemetry.addData("f Y Power:", vector.rightFront.getPower());
-            telemetry.addData("b Y Power:", vector.leftRear.getPower());
-            telemetry.addData("f X Power:", vector.leftFront.getPower());
-            telemetry.addData("b X Power:", vector.rightRear.getPower());
+            fY.setPower(inPower + ((absHeading-targetHeading)/YScaler));
+            bY.setPower(inPower - ((absHeading-targetHeading)/YScaler));
+            fX.setPower(inPower + ((absHeading-targetHeading)/XScaler));
+            bX.setPower(inPower - ((absHeading-targetHeading)/XScaler));
+            telemetry.addData("f X current:", fX.getCurrentPosition());
+            telemetry.addData("b X current:", bX.getCurrentPosition());
+            telemetry.addData("f Y current:", fY.getCurrentPosition());
+            telemetry.addData("b Y current:", bY.getCurrentPosition());
+            telemetry.addData("f X target:", fX.getTargetPosition());
+            telemetry.addData("b X target:", bX.getTargetPosition());
+            telemetry.addData("f Y target:", fY.getTargetPosition());
+            telemetry.addData("b Y target:", bY.getTargetPosition());
+            telemetry.addData("f Y Power:", fY.getPower());
+            telemetry.addData("b Y Power:", bY.getPower());
+            telemetry.addData("f X Power:", fX.getPower());
+            telemetry.addData("b X Power:", bX.getPower());
             telemetry.update();
         }
-        //stop all motors after reaching position
-        vector.rightFront.setPower(0);
-        vector.leftFront.setPower(0);
-        vector.leftRear.setPower(0);
-        vector.rightRear.setPower(0);
-    }
-
-    public void vectorCorrect(double correctTo){
-        vector.targetHeading = (correctTo);
-        while((vector.absHeading-vector.targetHeading)>1.5 || (vector.absHeading-vector.targetHeading)<-1.5){
-            vector.angles = vector.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            telemetry.addData("Heading", vector.angles.firstAngle);
-            telemetry.addData("Target", vector.targetHeading);
-            vector.absHeading = vector.angles.firstAngle;
-            vector.leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            vector.rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            if((vector.absHeading-vector.targetHeading) > 0){
-                double fXPow = (0.15 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (fXPow > 0.5){
-                    fXPow = 0.5;
-                }
-                else if (fXPow < -0.5){
-                    fXPow = -0.5;
-                }
-                double bXPow = (-0.15 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (bXPow > 0.5){
-                    bXPow = 0.5;
-                }
-                else if (bXPow < -0.5){
-                    bXPow = -0.5;
-                }
-                vector.leftFront.setPower(fXPow);
-                vector.rightRear.setPower(bXPow);
-            }
-            else if((vector.absHeading-vector.targetHeading < 0)){
-                double fXPow = (-0.1 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (fXPow > 0.5){
-                    fXPow = 0.5;
-                }
-                else if (fXPow < -0.5){
-                    fXPow = -0.5;
-                }
-                double bXPow = (0.1 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (bXPow > 0.5){
-                    bXPow = 0.5;
-                }
-                else if (bXPow < -0.5){
-                    bXPow = -0.5;
-                }
-                vector.leftFront.setPower(-fXPow);
-                vector.rightRear.setPower(-bXPow);
-            }
-            telemetry.addData("Front X Power:", vector.leftFront.getPower());
-            telemetry.addData("Back X Power:", vector.rightRear.getPower());
-            telemetry.update();
-        }
-        //stop all motors after reaching position
-        vector.rightFront.setPower(0);
-        vector.leftFront.setPower(0);
-        vector.leftRear.setPower(0);
-        vector.rightRear.setPower(0);
+        StopDriving();
     }
 
     public void vectorTurn (double correctTo){
-        vector.targetHeading = (correctTo);
-        while((vector.absHeading-vector.targetHeading)>2.5 || (vector.absHeading-vector.targetHeading)<-2.5){
-            vector.angles = vector.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            telemetry.addData("Heading", vector.angles.firstAngle);
-            telemetry.addData("Target", vector.targetHeading);
-            vector.absHeading = vector.angles.firstAngle;
-            vector.leftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            vector.rightRear.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        targetHeading = (correctTo);
+        while((absHeading-targetHeading)>2.5 || (absHeading-targetHeading)<-2.5){
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("Heading", angles.firstAngle);
+            telemetry.addData("Target", targetHeading);
+            absHeading = angles.firstAngle;
+            fX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             double bXPow = 0;
             double fXPow = 0;
-            if((vector.absHeading-vector.targetHeading) > 0){
-                bXPow = (0.15 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (bXPow > 0.6){
-                    bXPow = 0.6;
+            if((absHeading-targetHeading) > 0){
+                bXPow = (0.2 +((absHeading-targetHeading)/errorScaler));
+                if (bXPow > 0.7){
+                    bXPow = 0.7;
                 }
-                else if (bXPow < -0.6){
-                    bXPow = -0.6;
+                else if (bXPow < -0.7){
+                    bXPow = -0.7;
                 }
 
-                fXPow = (-0.15 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (fXPow > 0.6){
-                    fXPow = 0.6;
+                fXPow = (-0.2 -((absHeading-targetHeading)/errorScaler));
+                if (fXPow > 0.7){
+                    fXPow = 0.7;
                 }
-                else if (fXPow < -0.6){
-                    fXPow = -0.6;
+                else if (fXPow < -0.7){
+                    fXPow = -0.7;
                 }
-                vector.leftFront.setPower(fXPow);
-                vector.rightRear.setPower(bXPow);
+                fX.setPower(fXPow);
+                bX.setPower(bXPow);
             }
-            else if((vector.absHeading-vector.targetHeading) < 0){
-                bXPow = (-0.15 +((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (bXPow > 0.6){
-                    bXPow = 0.6;
+            else if((absHeading-targetHeading) < 0){
+                bXPow = (-0.2 +((absHeading-targetHeading)/errorScaler));
+                if (bXPow > 0.7){
+                    bXPow = 0.7;
                 }
-                else if (bXPow < -0.6){
-                    bXPow = -0.6;
-                }
-
-                fXPow = (0.15 -((vector.absHeading-vector.targetHeading)/vector.errorScaler));
-                if (fXPow > 0.6){
-                    fXPow = 0.6;
-                }
-                else if (fXPow < -0.6){
-                    fXPow = -0.6;
+                else if (bXPow < -0.7){
+                    bXPow = -0.7;
                 }
 
-                vector.leftFront.setPower(fXPow);
-                vector.rightRear.setPower(bXPow);
+                fXPow = (0.2 -((absHeading-targetHeading)/errorScaler));
+                if (fXPow > 0.7){
+                    fXPow = 0.7;
+                }
+                else if (fXPow < -0.7){
+                    fXPow = -0.7;
+                }
+
+                fX.setPower(fXPow);
+                bX.setPower(bXPow);
             }
-            telemetry.addData("Front X Power:", vector.leftFront.getPower());
-            telemetry.addData("Back X Power:", vector.rightRear.getPower());
+            telemetry.addData("Front X Power:", fX.getPower());
+            telemetry.addData("Back X Power:", bX.getPower());
             telemetry.update();
         }
-        vector.leftFront.setPower(0);
-        vector.rightFront.setPower(0);
-        vector.leftRear.setPower(0);
-        vector.rightRear.setPower(0);
+        StopDriving();
+    }
+
+    public void StopDriving(){
+        fY.setPower(0);
+        fX.setPower(0);
+        bY.setPower(0);
+        bX.setPower(0);
+    }
+
+    public void Correct(double correctTo){
+        targetHeading = (correctTo);
+        ElapsedTime runtime = new ElapsedTime();
+        runtime.reset();
+        while((runtime.seconds() < 2.0) &&((absHeading-targetHeading)>2 || (absHeading-targetHeading)<-2)){
+            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            telemetry.addData("Heading", angles.firstAngle);
+            telemetry.addData("Target", targetHeading);
+            absHeading = angles.firstAngle;
+            fX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            bX.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            if((absHeading-targetHeading) > 0){
+                double fXPow = (0.25 +((absHeading-targetHeading)/errorScaler));
+                if (fXPow > 0.6){
+                    fXPow = 0.6;
+                }
+                else if (fXPow < -0.6){
+                    fXPow = -0.6;
+                }
+                double bXPow = (-0.25 -((absHeading-targetHeading)/errorScaler));
+                if (bXPow > 0.6){
+                    bXPow = 0.6;
+                }
+                else if (bXPow < -0.6){
+                    bXPow = -0.6;
+                }
+                fX.setPower(fXPow);
+                bX.setPower(bXPow);
+            }
+            else if((absHeading-targetHeading < 0)){
+                double fXPow = (-0.25 +((absHeading-targetHeading)/errorScaler));
+                if (fXPow > 0.6){
+                    fXPow = 0.6;
+                }
+                else if (fXPow < -0.6){
+                    fXPow = -0.6;
+                }
+                double bXPow = (0.25 -((absHeading-targetHeading)/errorScaler));
+                if (bXPow > 0.6){
+                    bXPow = 0.6;
+                }
+                else if (bXPow < -0.6){
+                    bXPow = -0.6;
+                }
+                fX.setPower(fXPow);
+                bX.setPower(bXPow);
+            }
+            telemetry.addData("Front X Power:", fX.getPower());
+            telemetry.addData("Back X Power:", bX.getPower());
+            telemetry.update();
+        }
+        StopDriving();
     }
 
     public void linearExtension (double velocity, int position) {
         //reset encoder
-        vector.linx.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        linSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         //set target position between limits 0 to 1500
         //set negative position with positive power to reverse slide direction
-        vector.linx.setTargetPosition(position);
-        vector.linx.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        linSlide.setTargetPosition(position);
+        linSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //set power
-        vector.linx.setPower(velocity);
+        linSlide.setPower(velocity);
 
-        while (vector.linx.isBusy()){
+        while (linSlide.isBusy()){
 
         }
-        vector.linx.setPower(0);
+        linSlide.setPower(0);
     }
 
     public void carouselCycle () {
         //accelerate carousel wheel
-        vector.carin.setPower(0.5);
+        inCar.setPower(0.5);
         sleep(1000);
         //slow down carousel wheel so duck is not launched
-        vector.carin.setPower(0.25);
+        inCar.setPower(0.25);
         sleep(1500);
-        vector.linx.setPower(0);
+        linSlide.setPower(0);
     }
 
     public void highDeposit() {
         linearExtension(0.8, -1500);
-        vector.hopper.setPosition(0.825);
+        box.setPosition(0.825);
         sleep(300);
         linearExtension(0.8, 100);
-        vector.hopper.setPosition(0);
+        box.setPosition(0);
         linearExtension(0.8, 1450);
-        //vector.hopper.setPosition(0.05);
+        //box.setPosition(0.05);
     }
 
     public void middleDeposit() {
         linearExtension(0.5, -750);
-        vector.hopper.setPosition(0.75);
+        box.setPosition(0.75);
         sleep(500);
-        Trajectory forwardDrop = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(5, 5, Math.toRadians(0)))
-                .build();
-        vector.followTrajectory(forwardDrop);
-        vector.hopper.setPosition(0.825);
+        //Trajectory forwardDrop = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+        //        .lineToLinearHeading(new Pose2d(5, 5, Math.toRadians(0)))
+        //        .build();
+        //vector.followTrajectory(forwardDrop);
+        box.setPosition(0.825);
         sleep(500);
     }
 
     public void lowerDeposit() {
         linearExtension(0.5, -500);
-        vector.hopper.setPosition(0.75);
+        box.setPosition(0.75);
         sleep(500);
-        Trajectory forwardDrop = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(5, 5, Math.toRadians(0)))
-                .build();
-        vector.followTrajectory(forwardDrop);
-        vector.hopper.setPosition(0.825);
+        //Trajectory forwardDrop = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+        //        .lineToLinearHeading(new Pose2d(5, 5, Math.toRadians(0)))
+        //        .build();
+        //vector.followTrajectory(forwardDrop);
+        box.setPosition(0.825);
         sleep(500);
     }
 
     public void middleRetraction() {
-        vector.hopper.setPosition(0.25);
+        box.setPosition(0.25);
         sleep(500);
         linearExtension(0.5, 750);
         sleep(500);
     }
 
     public void lowerRetraction() {
-        vector.hopper.setPosition(0.25);
+        box.setPosition(0.25);
         sleep(500);
         linearExtension(0.5, 500);
         sleep(500);
