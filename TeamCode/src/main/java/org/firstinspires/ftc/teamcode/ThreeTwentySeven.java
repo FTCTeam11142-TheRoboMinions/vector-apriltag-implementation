@@ -19,12 +19,14 @@ public class ThreeTwentySeven extends OpMode {
     public DcMotor leftFront, leftRear, rightRear, rightFront;
     public DcMotor linSlide, inCar;
     public Servo box;
+    public Servo capper;
     public ColorSensor colorDistance;
+    public ElapsedTime runtime = new ElapsedTime();
     double leftFrontPower, rightFrontPower, leftRearPower, rightRearPower, armPow, inCarPow, boxPos, boxDist, linBase;
     boolean freight = false;
     boolean level3 = false;
+    boolean level2 = false;
     boolean level0 = false;
-
 
     @Override
     public void init() {
@@ -39,6 +41,7 @@ public class ThreeTwentySeven extends OpMode {
         linSlide = hardwareMap.get(DcMotor.class, "linx");
         inCar = hardwareMap.get(DcMotor.class, "carin");
         box = hardwareMap.get(Servo.class, "hopper");
+        capper = hardwareMap.get(Servo.class, "capper");
         colorDistance = hardwareMap.get(ColorSensor.class, "colorDistance");
         //Reversing inverted motors
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -90,6 +93,38 @@ public class ThreeTwentySeven extends OpMode {
             freight = false;
 
         }
+        else if (gamepad2.right_bumper) {
+            telemetry.addLine("Carousel Entered Slow");
+            telemetry.update();
+            runtime.reset();
+            while (runtime.seconds() <= 0.85 && gamepad2.right_bumper) {
+                inCarPow = 0.45;
+            }
+            telemetry.addLine("Carousel Entered Fast");
+            telemetry.update();
+            runtime.reset();
+            while (runtime.seconds() <= 2.0 && gamepad2.right_bumper) {
+                inCarPow = 0.65;
+            }
+            telemetry.clear();
+            telemetry.clear();
+        }
+        else if (gamepad2.left_bumper) {
+            telemetry.addLine("Carousel Entered Slow");
+            telemetry.update();
+            runtime.reset();
+            while (runtime.seconds() <= 0.85 && gamepad2.left_bumper) {
+                inCarPow = -0.45;
+            }
+            telemetry.addLine("Carousel Entered Fast");
+            telemetry.update();
+            runtime.reset();
+            while (runtime.seconds() <= 2.0 && gamepad2.left_bumper) {
+                inCarPow = -0.65;
+            }
+            telemetry.clear();
+            telemetry.clear();
+        }
         else{
             boxPos = .25;
             inCarPow = 0;
@@ -114,6 +149,16 @@ public class ThreeTwentySeven extends OpMode {
             armPow = 0.9;
         }
 
+        if (gamepad2.y) {
+            level2 = true;
+            armPow = 0.9;
+        }
+
+        if (gamepad2.b) {
+            level0 = true;
+            armPow = -0.9;
+        }
+
         if (level3){
             armPow = 0.9;
             if (linSlide.getCurrentPosition() >= (1475+linBase)){
@@ -122,9 +167,12 @@ public class ThreeTwentySeven extends OpMode {
             }
         }
 
-        if (gamepad2.b) {
-            level0 = true;
-            armPow = -0.9;
+        if (level2){
+            armPow = 0.9;
+            if (linSlide.getCurrentPosition() >= (740+linBase)){
+                armPow = 0;
+                level2 = false;
+            }
         }
 
         if (level0){
@@ -137,6 +185,17 @@ public class ThreeTwentySeven extends OpMode {
 
         if(gamepad2.back){
             linBase = linSlide.getCurrentPosition();
+        }
+
+        //Capping
+        if(gamepad2.dpad_up){
+            capper.setPosition(0);
+        }
+        else if(gamepad2.dpad_down){
+            capper.setPosition(0.2);
+        }
+        else{
+            capper.setPosition(0.9);
         }
 
         //Set power variables to hardware

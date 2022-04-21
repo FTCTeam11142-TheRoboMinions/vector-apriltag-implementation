@@ -87,7 +87,7 @@ public class SampleMecanumDrive extends MecanumDrive {
     public double originalHeading = 0.0;
     public double targetHeading = 0.0;
     public double boxDist;
-    public int errorScaler = 35;
+    public int errorScaler = 25;
     public int DriveScaler = 105;
     public boolean freight = false;
 

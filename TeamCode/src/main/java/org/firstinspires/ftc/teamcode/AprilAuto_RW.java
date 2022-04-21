@@ -187,7 +187,7 @@ public class AprilAuto_RW extends LinearOpMode
              * Insert your autonomous code here, presumably running some default configuration
              * since the tag was never sighted during INIT
              */
-            caseRight();
+            caseLeft();
 
         }
         else
@@ -198,10 +198,10 @@ public class AprilAuto_RW extends LinearOpMode
 
 
             // left of camera is negative, right is positive pose
-            if(tagOfInterest.pose.x*FEET_PER_METER <= 0)
+            if(tagOfInterest.pose.x*FEET_PER_METER >= -0.2)
             {
                 // do something
-                caseLeft();
+                caseRight();
             }
             else
             {
@@ -242,10 +242,123 @@ public class AprilAuto_RW extends LinearOpMode
 
     //Each method is used for the marker staring position
     public void caseLeft() {
+        Trajectory diagonal = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(29, -5, Math.toRadians(0)))
+                .build();
+        Trajectory forward = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(5, 5, Math.toRadians(0)))
+                .build();
+        Trajectory side = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(5, -5, Math.toRadians(0)))
+                .build();
+        Trajectory toHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(10, 10, Math.toRadians(0)))
+                .build();
+        Trajectory backToWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-12.5, -12.5, Math.toRadians(0)))
+                .build();
+        Trajectory strafeToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(15, -15, Math.toRadians(0)))
+                .build();
+        Trajectory strafeToWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(25, -25, Math.toRadians(0)))
+                .build();
+        Trajectory forwardToWarehouse = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-35, -35, Math.toRadians(0)))
+                .build();
+        Trajectory outFromWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-6, 6, Math.toRadians(0)))
+                .build();
+        Trajectory postCollection = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(27, 27, Math.toRadians(0)))
+                .build();
+        Trajectory strafeFromWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-20, 20, Math.toRadians(0)))
+                .build();
 
+        vector.capper.setPosition(0.7);
+        vector.followTrajectory(diagonal);
+        vectorCorrect(0);
+        lowerDeposit();
+        vectorTurn(90);
+        vector.followTrajectory(strafeToWall);
+        vector.carin.setPower(1);
+        vector.followTrajectory(forwardToWarehouse);
+        sense();
+        vector.hopper.setPosition(0.25);
+        vectorTurn(90);
+        vector.carin.setPower(-1);
+        sleep(500);
+        vector.carin.setPower(0);
+        vector.followTrajectory(strafeToWall);
+        vector.followTrajectory(postCollection);
+        vector.followTrajectory(outFromWall);
+        vectorTurn(50);
+        vector.followTrajectory(toHub);
+        highDeposit();
+        vectorTurn(90);
+        vector.followTrajectory(strafeToWall);
+        vector.followTrajectory(forwardToWarehouse);
     }
 
     public void caseMiddle() {
+        Trajectory diagonal = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+            .lineToLinearHeading(new Pose2d(27, -5, Math.toRadians(0)))
+            .build();
+        Trajectory forward = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(5, 5, Math.toRadians(0)))
+                .build();
+        Trajectory side = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(5, -5, Math.toRadians(0)))
+                .build();
+        Trajectory toHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(10, 10, Math.toRadians(0)))
+                .build();
+        Trajectory backToWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-12.5, -12.5, Math.toRadians(0)))
+                .build();
+        Trajectory strafeToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(15, -15, Math.toRadians(0)))
+                .build();
+        Trajectory strafeToWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(25, -25, Math.toRadians(0)))
+                .build();
+        Trajectory forwardToWarehouse = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-35, -35, Math.toRadians(0)))
+                .build();
+        Trajectory outFromWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-6, 6, Math.toRadians(0)))
+                .build();
+        Trajectory postCollection = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(27, 27, Math.toRadians(0)))
+                .build();
+        Trajectory strafeFromWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(-20, 20, Math.toRadians(0)))
+                .build();
+
+        vector.capper.setPosition(0.7);
+        vector.followTrajectory(diagonal);
+        vectorCorrect(0);
+        middleDeposit();
+        vectorTurn(90);
+        vector.followTrajectory(strafeToWall);
+        vector.carin.setPower(1);
+        vector.followTrajectory(forwardToWarehouse);
+        sense();
+        vector.hopper.setPosition(0.25);
+        vectorTurn(90);
+        vector.carin.setPower(-1);
+        sleep(500);
+        vector.carin.setPower(0);
+        vector.followTrajectory(strafeToWall);
+        vector.followTrajectory(postCollection);
+        vector.followTrajectory(outFromWall);
+        vectorTurn(50);
+        vector.followTrajectory(toHub);
+        highDeposit();
+        vectorTurn(90);
+        vector.followTrajectory(strafeToWall);
+        vector.followTrajectory(forwardToWarehouse);
 
     }
 
@@ -522,13 +635,31 @@ public class AprilAuto_RW extends LinearOpMode
     }
 
     public void highDeposit() {
-        linearExtension(0.8, -1500);
+        linearExtension(0.9, -1500);
         vector.hopper.setPosition(0.825);
         sleep(300);
-        linearExtension(0.8, 100);
+        linearExtension(0.9, 100);
         vector.hopper.setPosition(0);
-        linearExtension(0.8, 1450);
+        linearExtension(0.9, 1430);
         //vector.hopper.setPosition(0.05);
+    }
+
+    public void middleDeposit() {
+        linearExtension(0.9, -725);
+        vector.hopper.setPosition(0.825);
+        sleep(800);
+        vector.hopper.setPosition(0.325);
+        linearExtension(0.9, 675);
+        vector.hopper.setPosition(0);
+    }
+
+    public void lowerDeposit() {
+        linearExtension(0.9, -500);
+        vector.hopper.setPosition(0.825);
+        sleep(800);
+        vector.hopper.setPosition(0.325);
+        linearExtension(0.8, 450);
+        vector.hopper.setPosition(0);
     }
 
     public void sense(){
@@ -543,6 +674,7 @@ public class AprilAuto_RW extends LinearOpMode
                 if (vector.boxDist < 6) {
                     vector.freight = true;
                     vector.hopper.setPosition(0.25);
+                    vector.carin.setPower(-1);
                 }
             }
             vectorTurn(80);
@@ -550,7 +682,4 @@ public class AprilAuto_RW extends LinearOpMode
             telemetry.update();
         }
     }
-
-
-
 }

@@ -286,41 +286,12 @@ public class AprilAuto_BC_GYRO extends LinearOpMode
     }
 
     public void caseRight() {
-        /*
-        Trajectory forwardToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                  .lineToLinearHeading(new Pose2d(30, -17, Math.toRadians(0)))
-                  .build();
-        Trajectory toCarousel = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(-35, 35, Math.toRadians(0)))
-                .build();
 
-        Trajectory revToCarousel = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(-3, -3, Math.toRadians(0)))
-                .build();
-        Trajectory forwardToPark = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(11.3, 11.3, Math.toRadians(0)))
-                .build();
-
-        vector.followTrajectory(forwardToHub);
-        vectorTurn(0);
-        highDeposit();
-        vectorTurn(0);
-        vector.followTrajectory(toCarousel);
-        vectorTurn(0);
-        vector.carin.setPower(0.4);
-        vector.followTrajectory(revToCarousel);
-        vectorTurn(0);
-        sleep(3500);
-        vector.carin.setPower(0);
-        vectorTurn(0);
-        sleep(500);
-        vector.followTrajectory(forwardToPark);
-        */
-        Drive(0.6,0, 8);
-        vectorTurn(0);
-        Drive(0.6,-37, 0);
-        vectorTurn(0);
-        Drive(0.6,0, 8);
+        Drive(0.4,0, 8);
+        Correct(0);
+        Drive(0.4,-37, 0);
+        Correct(0);
+        Drive(0.4,0, 6);
         vectorTurn(0);
         highDeposit();
         Drive(0.4,65,0);
@@ -409,38 +380,38 @@ public class AprilAuto_BC_GYRO extends LinearOpMode
             double fXPow = 0;
             if((absHeading-targetHeading) > 0){
                 bXPow = (0.2 +((absHeading-targetHeading)/errorScaler));
-                if (bXPow > 0.7){
-                    bXPow = 0.7;
+                if (bXPow > 0.6){
+                    bXPow = 0.6;
                 }
-                else if (bXPow < -0.7){
-                    bXPow = -0.7;
+                else if (bXPow < -0.6){
+                    bXPow = -0.6;
                 }
 
                 fXPow = (-0.2 -((absHeading-targetHeading)/errorScaler));
-                if (fXPow > 0.7){
-                    fXPow = 0.7;
+                if (fXPow > 0.6){
+                    fXPow = 0.6;
                 }
-                else if (fXPow < -0.7){
-                    fXPow = -0.7;
+                else if (fXPow < -0.6){
+                    fXPow = -0.6;
                 }
                 fX.setPower(fXPow);
                 bX.setPower(bXPow);
             }
             else if((absHeading-targetHeading) < 0){
                 bXPow = (-0.2 +((absHeading-targetHeading)/errorScaler));
-                if (bXPow > 0.7){
-                    bXPow = 0.7;
+                if (bXPow > 0.6){
+                    bXPow = 0.6;
                 }
-                else if (bXPow < -0.7){
-                    bXPow = -0.7;
+                else if (bXPow < -0.6){
+                    bXPow = -0.6;
                 }
 
                 fXPow = (0.2 -((absHeading-targetHeading)/errorScaler));
-                if (fXPow > 0.7){
-                    fXPow = 0.7;
+                if (fXPow > 0.6){
+                    fXPow = 0.6;
                 }
-                else if (fXPow < -0.7){
-                    fXPow = -0.7;
+                else if (fXPow < -0.6){
+                    fXPow = -0.6;
                 }
 
                 fX.setPower(fXPow);
