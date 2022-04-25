@@ -208,37 +208,33 @@ public class AprilAuto_BC extends LinearOpMode {
     //Each method is used for the marker staring position
     public void caseLeft() {
         Trajectory forwardToHub = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(5, 19, Math.toRadians(0)))
-                .build();
-        Trajectory backUp = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(-5, -5, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(31, -14, Math.toRadians(0)))
                 .build();
         Trajectory toCarousel = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(31, -33, Math.toRadians(0)))
+                .lineToLinearHeading(new Pose2d(-40, -40, Math.toRadians(0)))
                 .build();
-        Trajectory revToCarousel = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
-                .lineToLinearHeading(new Pose2d(-7, -7, Math.toRadians(0)))
+        Trajectory outFromWall = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
+                .lineToLinearHeading(new Pose2d(7, -7, Math.toRadians(0)))
                 .build();
         Trajectory forwardToPark = vector.trajectoryBuilder(new Pose2d(0, 0, 0))
                 .lineToLinearHeading(new Pose2d(11.3, 11.3, Math.toRadians(0)))
                 .build();
 
         vector.followTrajectory(forwardToHub);
-        vectorCorrect(0);
-        lowerDeposit();
-        vector.followTrajectory(backUp);
+        vectorTurn(0);
+        highDeposit();
+        vectorTurn(80);
         vector.followTrajectory(toCarousel);
-        vectorTurn(0);
-        vector.carin.setPower(0.4);
-        //vector.followTrajectory(revToCarousel);
-        vectorTurn(0);
-        vector.rightFront.setPower(-0.2);
-        vector.leftRear.setPower(-0.2);
-        sleep(5500);
+        vector.carin.setPower(-0.4);
+        //vector.followTrajectory(outFromWall);
+        vectorTurn(78);
+        //vector.rightFront.setPower(-0.05);
+        //vector.leftRear.setPower(-0.05);
+        sleep(8500);
         vector.rightFront.setPower(0);
         vector.leftRear.setPower(0);
         vector.carin.setPower(0);
-        vectorCorrect(0);
+        vectorTurn(0);
         sleep(500);
         vector.followTrajectory(forwardToPark);
     }
@@ -295,11 +291,11 @@ public class AprilAuto_BC extends LinearOpMode {
         highDeposit();
         vectorTurn(80);
         vector.followTrajectory(toCarousel);
-        vector.carin.setPower(-0.4);
+        vector.carin.setPower(-0.45);
         //vector.followTrajectory(outFromWall);
         vectorTurn(78);
-        //vector.rightFront.setPower(-0.05);
-        //vector.leftRear.setPower(-0.05);
+        vector.rightFront.setPower(-0.07);
+        vector.leftRear.setPower(-0.07);
         sleep(8500);
         vector.rightFront.setPower(0);
         vector.leftRear.setPower(0);
@@ -492,8 +488,9 @@ public class AprilAuto_BC extends LinearOpMode {
         vector.linx.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //set power
         vector.linx.setPower(velocity);
-
-        while (vector.linx.isBusy()) {
+        ElapsedTime runtime = new ElapsedTime();
+        runtime.reset();
+        while (vector.linx.isBusy() && (runtime.seconds() < 3)){
 
         }
         vector.linx.setPower(0);

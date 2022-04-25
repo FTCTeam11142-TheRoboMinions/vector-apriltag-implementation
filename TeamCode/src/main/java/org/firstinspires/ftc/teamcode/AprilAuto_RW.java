@@ -187,7 +187,7 @@ public class AprilAuto_RW extends LinearOpMode
              * Insert your autonomous code here, presumably running some default configuration
              * since the tag was never sighted during INIT
              */
-            caseLeft();
+            caseRight();
 
         }
         else
@@ -201,12 +201,12 @@ public class AprilAuto_RW extends LinearOpMode
             if(tagOfInterest.pose.x*FEET_PER_METER >= -0.2)
             {
                 // do something
-                caseRight();
+                caseMiddle();
             }
             else
             {
                 // do something else
-                caseMiddle();
+                caseLeft();
             }
         }
 
@@ -617,11 +617,12 @@ public class AprilAuto_RW extends LinearOpMode
         vector.linx.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //set power
         vector.linx.setPower(velocity);
+        ElapsedTime runtime = new ElapsedTime();
+        runtime.reset();
+        while (vector.linx.isBusy() && (runtime.seconds() < 3)){
 
-           while (vector.linx.isBusy()){
-
-          }
-          vector.linx.setPower(0);
+        }
+        vector.linx.setPower(0);
     }
 
     public void carouselCycle () {

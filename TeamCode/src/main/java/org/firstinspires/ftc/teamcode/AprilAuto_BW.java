@@ -613,10 +613,11 @@ public class AprilAuto_BW extends LinearOpMode
         vector.linx.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //set power
         vector.linx.setPower(velocity);
+        ElapsedTime runtime = new ElapsedTime();
+        runtime.reset();
+        while (vector.linx.isBusy() && (runtime.seconds() < 3)){
 
-           while (vector.linx.isBusy()){
-
-          }
+        }
           vector.linx.setPower(0);
     }
 

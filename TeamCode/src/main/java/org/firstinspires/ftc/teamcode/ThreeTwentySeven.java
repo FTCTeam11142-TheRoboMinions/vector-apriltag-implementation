@@ -23,6 +23,7 @@ public class ThreeTwentySeven extends OpMode {
     public ColorSensor colorDistance;
     public ElapsedTime runtime = new ElapsedTime();
     double leftFrontPower, rightFrontPower, leftRearPower, rightRearPower, armPow, inCarPow, boxPos, boxDist, linBase;
+    boolean Duck = false;
     boolean freight = false;
     boolean level3 = false;
     boolean level2 = false;
@@ -61,7 +62,6 @@ public class ThreeTwentySeven extends OpMode {
         if (colorDistance instanceof DistanceSensor) {
             telemetry.addData("Distance (cm)", "%.3f", ((DistanceSensor) colorDistance).getDistance(DistanceUnit.CM));
             boxDist = ((DistanceSensor) colorDistance).getDistance(DistanceUnit.CM);
-            telemetry.update();
         }
         //Motor Variable Powers
         leftFrontPower = gamepad1.right_stick_x;
@@ -87,50 +87,21 @@ public class ThreeTwentySeven extends OpMode {
         }
         else if (gamepad2.right_trigger > 0.05){
             inCarPow = -1;
+            boxPos = .4;
         }
         else if (gamepad2.a){
             boxPos = .8;
             freight = false;
 
         }
-        else if (gamepad2.right_bumper) {
-            telemetry.addLine("Carousel Entered Slow");
-            telemetry.update();
-            runtime.reset();
-            while (runtime.seconds() <= 0.85 && gamepad2.right_bumper) {
-                inCarPow = 0.45;
-            }
-            telemetry.addLine("Carousel Entered Fast");
-            telemetry.update();
-            runtime.reset();
-            while (runtime.seconds() <= 2.0 && gamepad2.right_bumper) {
-                inCarPow = 0.65;
-            }
-            telemetry.clear();
-            telemetry.clear();
-        }
-        else if (gamepad2.left_bumper) {
-            telemetry.addLine("Carousel Entered Slow");
-            telemetry.update();
-            runtime.reset();
-            while (runtime.seconds() <= 0.85 && gamepad2.left_bumper) {
-                inCarPow = -0.45;
-            }
-            telemetry.addLine("Carousel Entered Fast");
-            telemetry.update();
-            runtime.reset();
-            while (runtime.seconds() <= 2.0 && gamepad2.left_bumper) {
-                inCarPow = -0.65;
-            }
-            telemetry.clear();
-            telemetry.clear();
-        }
         else{
             boxPos = .25;
             inCarPow = 0;
+
+
         }
 
-        if (boxDist < 5){
+        if (boxDist < 4){
             freight = true;
         }
 
@@ -169,7 +140,7 @@ public class ThreeTwentySeven extends OpMode {
 
         if (level2){
             armPow = 0.9;
-            if (linSlide.getCurrentPosition() >= (740+linBase)){
+            if (linSlide.getCurrentPosition() >= (640+linBase)){
                 armPow = 0;
                 level2 = false;
             }
@@ -183,19 +154,69 @@ public class ThreeTwentySeven extends OpMode {
             }
         }
 
+        if(gamepad1.start){
+            telemetry.addData("CANCELLED", "CANCELLED CANCELLED CANCELLED CANCELLED");
+            level0 = false;
+            level2 = false;
+            level3 = false;
+            armPow = 0;
+            //linBase = linSlide.getCurrentPosition();
+
+        }
+
         if(gamepad2.back){
             linBase = linSlide.getCurrentPosition();
         }
 
         //Capping
         if(gamepad2.dpad_up){
-            capper.setPosition(0);
+            capper.setPosition(0.9);
         }
         else if(gamepad2.dpad_down){
-            capper.setPosition(0.2);
+            capper.setPosition(0.08);
         }
-        else{
-            capper.setPosition(0.9);
+        else if(gamepad2.dpad_right || gamepad2.dpad_left){
+            capper.setPosition(0.5);
+        }
+
+        //carousel
+        if(gamepad2.right_bumper){
+            Duck = true;
+            telemetry.addLine("Carousel Entered Slow");
+            telemetry.update();
+            runtime.reset();
+            while (runtime.seconds() <= 1.35 && gamepad2.right_bumper) {
+                inCar.setPower(.45);
+            }
+            telemetry.addLine("Carousel Entered Fast");
+            telemetry.update();
+            runtime.reset();
+            while (runtime.seconds() <= 2.0 && gamepad2.right_bumper) {
+                inCar.setPower(1);
+            }
+            inCar.setPower(0);
+            telemetry.clear();
+            telemetry.clear();
+            Duck = false;
+        }
+        if(gamepad2.left_bumper){
+            Duck = true;
+            telemetry.addLine("Carousel Entered Slow");
+            telemetry.update();
+            runtime.reset();
+            while (runtime.seconds() <= 1.35 && gamepad2.left_bumper) {
+                inCar.setPower(-0.45);
+            }
+            telemetry.addLine("Carousel Entered Fast");
+            telemetry.update();
+            runtime.reset();
+            while (runtime.seconds() <= 2.0 && gamepad2.left_bumper) {
+                inCar.setPower(-1);
+            }
+            inCar.setPower(0);
+            telemetry.clear();
+            telemetry.clear();
+            Duck = false;
         }
 
         //Set power variables to hardware
@@ -206,5 +227,6 @@ public class ThreeTwentySeven extends OpMode {
         leftRear.setPower(leftRearPower);
         rightRear.setPower(rightRearPower);
         linSlide.setPower(armPow);
+        telemetry.update();
     }
 }
